@@ -7,7 +7,7 @@ export interface AttendanceBook {
   check(meetingId: string, memberId: string): void;
   /** 체크 취소. 체크되지 않은 회원이면 오류. 비활성 회원도 취소 가능 (M2-Q2). */
   uncheck(meetingId: string, memberId: string): void;
-  /** 체크했는지 여부. */
+  /** 체크했는지 여부. 모임 ID가 비어 있거나 공백뿐이면 오류 (M2-Q13). */
   isChecked(meetingId: string, memberId: string): boolean;
   /**
    * 모임별 출석자 목록 (체크한 순서). R-03 formTeams 의 attendees 로 그대로 쓸 수 있다.
@@ -73,7 +73,10 @@ export function createAttendanceBook(registry: MemberRegistry): AttendanceBook {
       byMeeting.get(meetingId)?.delete(memberId);
       byMember.get(memberId)?.delete(meetingId);
     },
-    isChecked,
+    isChecked(meetingId, memberId) {
+      // M2-Q13: 다른 함수와 같이 공백뿐인 모임 ID는 오류
+      return isChecked(validMeetingId(meetingId), memberId);
+    },
     attendees(meetingId) {
       validMeetingId(meetingId);
       const ids = byMeeting.get(meetingId) ?? new Set<string>();
