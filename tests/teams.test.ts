@@ -148,14 +148,22 @@ describe("R-03 팀 자동 편성 — 인원 규칙", () => {
     expect(() => formTeams({ attendees, teamCount: 2, teamSize: 2, seed: 1 })).toThrow(/부족/);
   });
 
-  it("팀 수·팀당 인원수가 1 이상의 정수가 아니면 오류", () => {
+  it("(Q5) 팀 수가 2 이상의 정수가 아니면 오류 — 인원이 충분해도 1팀은 불가", () => {
     const attendees = fakeMembers([1, 2, 3, 4]);
-    expect(() => formTeams({ attendees, teamCount: 0, teamSize: 2 })).toThrow();
-    expect(() => formTeams({ attendees, teamCount: 2, teamSize: 0 })).toThrow();
-    expect(() => formTeams({ attendees, teamCount: 1.5, teamSize: 2 })).toThrow();
+    expect(() => formTeams({ attendees, teamCount: 1, teamSize: 2, seed: 1 })).toThrow(/팀 수는 2 이상/);
+    expect(() => formTeams({ attendees, teamCount: 0, teamSize: 2 })).toThrow(/팀 수는 2 이상/);
+    expect(() => formTeams({ attendees, teamCount: -1, teamSize: 2 })).toThrow(/팀 수는 2 이상/);
+    expect(() => formTeams({ attendees, teamCount: 2.5, teamSize: 1 })).toThrow(/팀 수는 2 이상/);
+    expect(formTeams({ attendees, teamCount: 2, teamSize: 2, seed: 1 }).teams).toHaveLength(2); // 경계값 2는 허용
   });
 
-  it("같은 회원이 참석 목록에 중복되면 오류", () => {
+  it("팀당 인원수가 1 이상의 정수가 아니면 오류", () => {
+    const attendees = fakeMembers([1, 2, 3, 4]);
+    expect(() => formTeams({ attendees, teamCount: 2, teamSize: 0 })).toThrow(/팀당 인원수/);
+    expect(() => formTeams({ attendees, teamCount: 2, teamSize: 1.5 })).toThrow(/팀당 인원수/);
+  });
+
+  it("(Q4) 같은 회원이 참석 목록에 중복되면 오류", () => {
     const [a, b] = fakeMembers([1, 2]) as [Member, Member];
     expect(() => formTeams({ attendees: [a, b, a, b], teamCount: 2, teamSize: 2, seed: 1 })).toThrow(/중복/);
   });
