@@ -45,6 +45,11 @@ export interface DuesLedger {
 
 const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
+/** 돌려줄 때는 paidAt 을 새 Date 로 복사한다 (M2-Q10). 받은 쪽이 바꿔도 저장 값은 그대로. */
+function copy(p: DuesPayment): DuesPayment {
+  return Object.freeze({ ...p, paidAt: new Date(p.paidAt.getTime()) });
+}
+
 function validMonth(month: string): YearMonth {
   if (!MONTH_PATTERN.test(month)) {
     throw new Error(`대상 월은 YYYY-MM 형식이어야 합니다: ${month}`);
@@ -105,9 +110,9 @@ export function createDuesLedger(options: DuesLedgerOptions): DuesLedger {
         paidAt: new Date(input.paidAt.getTime()),
       });
       payments.push(payment);
-      return payment;
+      return copy(payment);
     },
-    paymentsForMonth: paymentsOf,
+    paymentsForMonth: (month) => paymentsOf(month).map(copy),
     unpaidMembers(month) {
       const paid = new Set(paymentsOf(month).map((p) => p.memberId));
       return members.list().filter((m) => !exempt.has(m.id) && !paid.has(m.id));

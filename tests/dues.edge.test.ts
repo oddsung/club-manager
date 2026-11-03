@@ -123,4 +123,36 @@ describe("R-05 회비 납부 — 경계값·예외", () => {
     input.setFullYear(2000);
     expect(ledger.paymentsForMonth("2026-11")[0]?.paidAt.getTime()).toBe(PAID_AT.getTime());
   });
+
+  it("recordPayment 가 돌려준 paidAt 을 바꿔도 저장된 납부 시각은 그대로다 (M2-Q10)", () => {
+    const { ledger, a, pay } = setup();
+    const returned = pay(a.id);
+    returned.paidAt.setFullYear(2000);
+    expect(ledger.paymentsForMonth("2026-11")[0]?.paidAt.getTime()).toBe(PAID_AT.getTime());
+  });
+
+  it("paymentsForMonth 가 돌려준 paidAt 을 바꿔도 저장된 납부 시각은 그대로다 (M2-Q10)", () => {
+    const { ledger, a, pay } = setup();
+    pay(a.id);
+    ledger.paymentsForMonth("2026-11")[0]?.paidAt.setFullYear(2000);
+    expect(ledger.paymentsForMonth("2026-11")[0]?.paidAt.getTime()).toBe(PAID_AT.getTime());
+  });
+
+  it("납부 후 면제 지정된 회원의 납부도 그 달 목록·합계에 포함된다 (M2-Q11)", () => {
+    const { ledger, a, b, pay } = setup();
+    pay(a.id);
+    pay(b.id);
+    ledger.setExempt(a.id);
+    expect(ledger.paymentsForMonth("2026-11").map((p) => p.memberId)).toEqual([a.id, b.id]);
+    expect(ledger.totalForMonth("2026-11")).toBe(FEE * 2);
+  });
+
+  it("납부 후 비활성화된 회원의 납부도 그 달 목록·합계에 포함된다 (M2-Q11)", () => {
+    const { members, ledger, a, b, pay } = setup();
+    pay(a.id);
+    pay(b.id);
+    members.deactivate(b.id);
+    expect(ledger.paymentsForMonth("2026-11").map((p) => p.memberId)).toEqual([a.id, b.id]);
+    expect(ledger.totalForMonth("2026-11")).toBe(FEE * 2);
+  });
 });
