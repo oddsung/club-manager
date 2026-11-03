@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Member } from "../src/members";
 import { createRng, randomInt, type Rng } from "../src/rng";
 import { formTeams, type TeamFormationResult } from "../src/teams";
+import { legacySpread } from "./helpers/legacy-teams";
 
 // 가짜 회원 생성 (실데이터 금지)
 function fakeMembers(grades: readonly number[], prefix = "p"): Member[] {
@@ -125,7 +126,7 @@ describe("R-03 팀 자동 편성 — 인원 규칙", () => {
     expect(r.waiting).toHaveLength(1);
   });
 
-  it("대기 인원 선정은 무작위 (시드에 따라 달라짐)", () => {
+  it("(Q6) 균형이 같은 후보끼리는 시드 기반 무작위 — 등급이 모두 같으면 대기 인원이 시드에 따라 달라짐", () => {
     const attendees = fakeMembers([3, 3, 3, 3, 3, 3]);
     const waitingIds = new Set<string>();
     for (let seed = 0; seed < 30; seed++) {
@@ -245,5 +246,98 @@ describe("R-03 팀 자동 편성 — 실력 균형 검증 (무작위 입력 반�
       }
       expect(optimal / RUNS, `${c.teamCount}팀×${c.teamSize}명`).toBeGreaterThanOrEqual(0.95);
     }
+  });
+});
+
+/** 출전자 선택까지 포함한 최적 spread (모든 출전자 조합 × 완전탐색). 소규모 입력 전용. */
+function optimalSpreadWithWaiting(grades: readonly number[], teamCount: number, teamSize: number): number {
+  const needed = teamCount * teamSize;
+  let best = Infinity;
+  const pick = (start: number, chosen: number[]) => {
+    if (chosen.length === needed) {
+      best = Math.min(best, optimalSpread(chosen, teamCount, teamSize));
+      return;
+    }
+    for (let i = start; i <= grades.length - (needed - chosen.length); i++) {
+      pick(i + 1, [...chosen, grades[i] ?? 0]);
+    }
+  };
+  pick(0, []);
+  return best;
+}
+
+describe("R-03 (Q6) 대기 인원 균형 기준 선정", () => {
+  const withWaiting = [
+    { teamCount: 2, teamSize: 2, extra: 1 },
+    { teamCount: 4, teamSize: 2, extra: 3 },
+    { teamCount: 2, teamSize: 4, extra: 2 },
+    { teamCount: 3, teamSize: 4, extra: 4 },
+    { teamCount: 2, teamSize: 6, extra: 3 },
+    { teamCount: 2, teamSize: 11, extra: 5 },
+  ];
+  const RUNS = 200;
+
+  it("균형을 깨는 회원은 대기로 빠진다 (시드와 무관)", () => {
+    const attendees = fakeMembers([3, 3, 3, 3, 10]);
+    for (let seed = 0; seed < 20; seed++) {
+      const r = formTeams({ attendees, teamCount: 2, teamSize: 2, seed });
+      expect(r.waiting.map((m) => m.grade)).toEqual([10]);
+      expect(r.spread).toBe(0);
+    }
+  });
+
+  it(`같은 입력·같은 시드에서 기존 방식(무작위 대기)보다 spread 가 나빠지지 않는다  [${withWaiting.length}개 구성 × ${RUNS}회]`, () => {
+    const rng = createRng(606);
+    let strictlyBetter = 0;
+    for (const c of withWaiting) {
+      for (let run = 0; run < RUNS; run++) {
+        const attendees = fakeMembers(randomGrades(rng, c.teamCount * c.teamSize + c.extra, 1, 10));
+        const r = formTeams({ ...c, attendees, seed: run });
+        expectValidResult(r, attendees, c.teamCount, c.teamSize);
+        const before = legacySpread(attendees, c.teamCount, c.teamSize, run);
+        expect(r.spread, `${c.teamCount}팀×${c.teamSize}명 run=${run}`).toBeLessThanOrEqual(before);
+        if (r.spread < before) strictlyBetter++;
+      }
+    }
+    // 측정: 1200회 중 760회 엄격히 개선, 나머지는 동일. 개선이 0이면 2단계가 동작하지 않는다는 뜻.
+    expect(strictlyBetter).toBeGreaterThan(0);
+  });
+
+  it("소규모 입력: 출전자 선택까지 포함한 완전탐색 최적값과 비교 (일치율 ≥ 95%, 차이 ≤ 1, 기존 방식 이상)", () => {
+    const rng = createRng(707);
+    const small = [
+      { teamCount: 2, teamSize: 2, extra: 2 },
+      { teamCount: 2, teamSize: 3, extra: 2 },
+      { teamCount: 2, teamSize: 4, extra: 3 },
+      { teamCount: 3, teamSize: 2, extra: 3 },
+      { teamCount: 4, teamSize: 2, extra: 2 },
+    ];
+    // 측정: 새 방식은 5개 구성 모두 100/100 최적, 기존 방식은 6~36/100. 95% 는 보수적 하한.
+    const SMALL_RUNS = 100;
+    for (const c of small) {
+      let optimal = 0;
+      let legacyOptimal = 0;
+      for (let run = 0; run < SMALL_RUNS; run++) {
+        const grades = randomGrades(rng, c.teamCount * c.teamSize + c.extra, 1, 10);
+        const attendees = fakeMembers(grades);
+        const r = formTeams({ ...c, attendees, seed: run });
+        const best = optimalSpreadWithWaiting(grades, c.teamCount, c.teamSize);
+        expect(r.spread - best).toBeLessThanOrEqual(1);
+        if (r.spread === best) optimal++;
+        if (legacySpread(attendees, c.teamCount, c.teamSize, run) === best) legacyOptimal++;
+      }
+      const label = `${c.teamCount}팀×${c.teamSize}명+대기${c.extra}`;
+      expect(optimal / SMALL_RUNS, label).toBeGreaterThanOrEqual(0.95);
+      expect(optimal, label).toBeGreaterThanOrEqual(legacyOptimal);
+    }
+  });
+
+  it("대기 인원이 있어도 같은 시드 → 같은 결과 (팀·대기 모두)", () => {
+    const attendees = fakeMembers(randomGrades(createRng(808), 27, 1, 5));
+    const a = formTeams({ attendees, teamCount: 3, teamSize: 7, seed: 42 });
+    const b = formTeams({ attendees, teamCount: 3, teamSize: 7, seed: 42 });
+    expect(a.waiting).toHaveLength(6);
+    expect(a.teams).toEqual(b.teams);
+    expect(a.waiting).toEqual(b.waiting);
   });
 });
