@@ -1,0 +1,28 @@
+name: 에이전트 작업 요청
+description: 매니저 에이전트가 처리할 작업을 등록합니다 (oddsung 계정 작성분만 처리)
+title: "[작업] "
+labels: ["agent:todo"]
+body:
+  - type: textarea
+    id: want
+    attributes:
+      label: 원하는 것
+      description: 무엇이 필요한지, 왜 필요한지 자유롭게 적어 주세요. 동호회 운영 관점이면 충분합니다.
+      placeholder: 예) 최근 3회 모임에 한 번도 안 나온 회원 목록을 볼 수 있으면 좋겠다. 총무가 연락할 때 쓰려고.
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: 이렇게 되면 완료 (선택)
+      description: 비워 두면 매니저가 제안하고 질문합니다.
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 우선순위
+      options:
+        - 보통
+        - 높음
+        - 낮음
+    validations:
+      required: true
