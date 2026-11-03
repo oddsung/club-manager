@@ -37,6 +37,8 @@ export interface MemberRegistry {
   changeGrade(id: string, grade: number): Member;
   /** 탈퇴 처리 (비활성화). 기록은 남는다. */
   deactivate(id: string): Member;
+  /** 비활성 회원 재활성화 (Q1). 이미 활성이면 오류. */
+  reactivate(id: string): Member;
 }
 
 export function createMemberRegistry(options: MemberRegistryOptions): MemberRegistry {
@@ -98,6 +100,11 @@ export function createMemberRegistry(options: MemberRegistryOptions): MemberRegi
     },
     deactivate(id) {
       return save({ ...mustGet(id), active: false });
+    },
+    reactivate(id) {
+      const current = mustGet(id);
+      if (current.active) throw new Error(`이미 활성 상태인 회원입니다: ${id}`);
+      return save({ ...current, active: true });
     },
   };
 }
