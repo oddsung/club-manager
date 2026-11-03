@@ -27,16 +27,29 @@
 ## 팀 작업 (코디네이터 + 팀원)
 - **코디네이터(리드)는 코드를 쓰지 않습니다.** `src/`, `tests/` 를 직접 수정하지 않고, 계획·분배·통합 점검·보고만 합니다.
   코디네이터가 수정해도 되는 파일은 `docs/` 뿐입니다.
-- **팀원은 각자 자기 worktree에서만 작업합니다.** 시작할 때 아래처럼 만들고, 이후 모든 명령은 그 폴더 안에서 실행합니다.
+- **팀원은 각자 자기 worktree에서만 작업합니다.** 시작할 때 아래처럼 만듭니다.
   ```
   git fetch origin main
   git worktree add .worktrees/<이름> -b agent/<이름> origin/main
-  cd .worktrees/<이름>
-  npm ci
+  npm --prefix .worktrees/<이름> ci
   ```
+- **명령은 한 번에 하나씩, 폴더 이동(`cd`) 없이** 아래 형식으로만 실행합니다. `cd ... && git ...` 처럼 이어 붙이면
+  허용 목록에 맞지 않아 승인 요청이 생기는데, **팀원의 승인 요청은 사람의 휴대폰에 전달되지 않아 작업이 조용히 멈춥니다** (TASK-003에서 확인).
+
+  | 하려는 일 | 이렇게 실행 |
+  |---|---|
+  | 검사 | `npm --prefix .worktrees/<이름> run check` |
+  | 상태·변경 확인 | `git -C .worktrees/<이름> status` / `git -C .worktrees/<이름> diff --stat` |
+  | 커밋 | `git -C .worktrees/<이름> add <파일>` 실행 후 따로 `git -C .worktrees/<이름> commit -m "..."` |
+  | push | `git -C .worktrees/<이름> push -u origin agent/<이름>` |
+  | PR 생성 | `gh pr create --base main --head agent/<이름> --title "..." --body "..."` |
+
+- 파일 수정은 `.worktrees/<이름>/src/...`, `.worktrees/<이름>/tests/...` 경로로 합니다.
+- 위 표에 없는 명령이 꼭 필요하면 실행하지 말고 먼저 코디네이터에게 메시지로 알립니다. 코디네이터는 사람에게 보고합니다.
 - 팀원은 배정된 파일만 만들고 고칩니다. 다른 팀원 파일, `src/index.ts`, `docs/` 는 수정하지 않습니다.
   모호한 점은 직접 문서에 쓰지 말고 코디네이터에게 메시지로 보냅니다. 코디네이터가 `docs/requirements.md` "논의 중"에 모아 기록합니다.
 - 팀원은 자기 worktree에서 `npm run check` 통과 → push → PR 생성까지 하고 코디네이터에게 PR 번호를 보고합니다.
+- 코디네이터는 팀원이 실제로 무엇을 실행했는지, 승인 대기 중인지 직접 볼 수 없습니다. 보고에는 **확인한 사실과 추정을 구분**해 적습니다.
 
 ## 금지 사항
 - `.env`, 비밀번호, API 키, 토큰을 코드·커밋·로그에 넣지 않습니다. 필요한 값은 `.env.example`에 키 이름만 적습니다.
