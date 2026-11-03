@@ -131,6 +131,21 @@ describe("R-06 다가오는 모임 경계값", () => {
     board.update(m.id, { startsAt: at("2026-11-01T19:00:00Z") });
     expect(board.upcoming(before)).toEqual([]);
   });
+
+  it("(M2-Q15) 시작 시각이 같으면 생성 순서대로", () => {
+    const { board } = setup();
+    board.create({ title: "나중", startsAt: at("2026-11-12T19:00:00Z") });
+    board.create({ title: "같은1", startsAt });
+    board.create({ title: "같은2", startsAt });
+    board.create({ title: "같은3", startsAt });
+    expect(board.upcoming(before).map((m) => m.title)).toEqual(["같은1", "같은2", "같은3", "나중"]);
+  });
+
+  it("(M2-Q14) 잘못된 now 를 넘기면 오류", () => {
+    const { board } = setup();
+    board.create({ title: "모임", startsAt });
+    expect(() => board.upcoming(at("잘못된 날짜"))).toThrow(/날짜/);
+  });
 });
 
 describe("R-06 참석 응답 경계값", () => {
@@ -193,5 +208,45 @@ describe("R-06 참석 응답 경계값", () => {
     members.reactivate(a.id);
     board.respond(m.id, a.id, "attending", before);
     expect(board.summary(m.id).attending.memberIds).toEqual([a.id]);
+  });
+
+  it("(M2-Q14) 잘못된 now 를 넘기면 오류이고 응답은 기록되지 않는다", () => {
+    const { board, a } = setup();
+    const m = board.create({ title: "모임", startsAt });
+    expect(() => board.respond(m.id, a.id, "attending", at("잘못된 날짜"))).toThrow(/날짜/);
+    expect(board.summary(m.id).attending.count).toBe(0);
+  });
+});
+
+describe("R-06 응답 집계와 비활성 회원 (M2-Q16)", () => {
+  it("응답 후 비활성화된 회원은 집계에서 제외된다", () => {
+    const { members, board, a, b } = setup();
+    const m = board.create({ title: "모임", startsAt });
+    board.respond(m.id, a.id, "attending", before);
+    board.respond(m.id, b.id, "attending", before);
+    members.deactivate(a.id);
+    expect(board.summary(m.id).attending).toEqual({ count: 1, memberIds: [b.id] });
+  });
+
+  it("세 응답 상태 모두에서 비활성 회원이 제외된다", () => {
+    const { members, board, a, b } = setup();
+    const m1 = board.create({ title: "모임1", startsAt });
+    const m2 = board.create({ title: "모임2", startsAt });
+    board.respond(m1.id, a.id, "absent", before);
+    board.respond(m2.id, a.id, "undecided", before);
+    board.respond(m2.id, b.id, "undecided", before);
+    members.deactivate(a.id);
+    expect(board.summary(m1.id).absent).toEqual({ count: 0, memberIds: [] });
+    expect(board.summary(m2.id).undecided).toEqual({ count: 1, memberIds: [b.id] });
+  });
+
+  it("재활성화되면 기존 응답이 처음 응답한 순서대로 다시 보인다", () => {
+    const { members, board, a, b } = setup();
+    const m = board.create({ title: "모임", startsAt });
+    board.respond(m.id, a.id, "attending", before);
+    board.respond(m.id, b.id, "attending", before);
+    members.deactivate(a.id);
+    members.reactivate(a.id);
+    expect(board.summary(m.id).attending).toEqual({ count: 2, memberIds: [a.id, b.id] });
   });
 });
