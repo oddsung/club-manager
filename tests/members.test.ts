@@ -61,6 +61,39 @@ describe("R-01 회원 관리", () => {
     expect(() => reg.deactivate("없는-ID")).toThrow();
   });
 
+  it("(Q1) 비활성 회원을 재활성화하면 다시 활성 목록에 나온다", () => {
+    const reg = newRegistry();
+    const a = reg.register({ name: "회원", grade: 2 });
+    reg.deactivate(a.id);
+    const back = reg.reactivate(a.id);
+    expect(back).toMatchObject({ id: a.id, name: "회원", grade: 2, active: true });
+    expect(reg.get(a.id)?.active).toBe(true);
+    expect(reg.list().map((m) => m.id)).toEqual([a.id]);
+  });
+
+  it("(Q1) 이미 활성인 회원을 재활성화하면 오류, 없는 ID도 오류", () => {
+    const reg = newRegistry();
+    const a = reg.register({ name: "회원", grade: 2 });
+    expect(() => reg.reactivate(a.id)).toThrow(/이미 활성/);
+    expect(() => reg.reactivate("없는-ID")).toThrow(/찾을 수 없/);
+  });
+
+  it("(Q2) 비활성 회원도 정보·등급을 수정할 수 있고, 수정해도 비활성 상태는 유지된다", () => {
+    const reg = newRegistry();
+    const a = reg.register({ name: "회원", grade: 2 });
+    reg.deactivate(a.id);
+    expect(reg.update(a.id, { name: "새이름" })).toMatchObject({ name: "새이름", active: false });
+    expect(reg.changeGrade(a.id, 5)).toMatchObject({ grade: 5, active: false });
+    expect(reg.get(a.id)).toMatchObject({ name: "새이름", grade: 5, active: false });
+  });
+
+  it("(Q3) 기본 ID는 저장소 내 순번 m-1, m-2, … 이다", () => {
+    const reg = newRegistry();
+    const ids = [1, 2, 3].map((g) => reg.register({ name: `회원${g}`, grade: g }).id);
+    expect(ids).toEqual(["m-1", "m-2", "m-3"]);
+    expect(newRegistry().register({ name: "회원", grade: 1 }).id).toBe("m-1"); // 저장소마다 따로 센다
+  });
+
   it("반환된 회원 객체를 바꿔도 저장소는 영향받지 않는다", () => {
     const reg = newRegistry();
     const a = reg.register({ name: "회원", grade: 2 });
