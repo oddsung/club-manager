@@ -17,7 +17,7 @@
 - 구성: `AGENTS.md`/`CLAUDE.md`, `.claude/settings.json` 권한, `npm run check`, CI(크기 검사 포함), `main` 보호 규칙(PR·CI 필수), verify 스킬
 - 근거: 사이클 1~2에서 PR당 개입 약 3.5회 → 약 1회, 실수→검사 승격 1회(PR 크기 검사)
 
-## 2단계 — 코디네이터 (병렬화) ⏳
+## 2단계 — 코디네이터 (병렬화) ⏳ 트랙 A 진행 중 (TASK-003)
 - 구성: 직접 코딩하지 않는 코디네이터 세션 1개 + 워커 여러 개. 사람은 코디네이터와만 대화
 - 트랙 A (주 트랙, 회사 이식 가능): 집 PC의 Claude Code 에이전트 팀 + Remote Control
 - 트랙 B (비교용): Claude Code Projects (클라우드 스레드, GitHub 전용)
