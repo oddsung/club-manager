@@ -6,7 +6,7 @@
 `docs/requirements.md`의 **M1 범위(R-01, R-02, R-03)** 를 순수 TypeScript 도메인 로직으로 구현한다.
 
 ## 완료 조건 (모두 충족해야 완료)
-1. `make check` 통과 (guards, lint, typecheck, test)
+1. `npm run check` 통과 (guards, lint, typecheck, test)
 2. R-01~R-03의 각 규칙마다 최소 1개 이상의 테스트가 있다
 3. 팀 편성 테스트에 다음이 포함된다
    - 같은 시드 → 같은 결과 / 다른 시드 → 다른 결과가 나올 수 있음
@@ -17,7 +17,7 @@
 4. `/verify` 스킬의 보고 형식으로 결과를 보고한다
 
 ## 보고에 포함할 증거
-- `make check` 출력 마지막 부분
+- `npm run check` 출력 마지막 부분
 - 사용한 팀 편성 알고리즘 한 줄 설명과, 균형 기준값을 그렇게 정한 이유
 
 ## 제약
