@@ -18,7 +18,18 @@
       "Bash(git fetch:*)",
       "Bash(git worktree add .worktrees/:*)",
       "Bash(git worktree list)",
-      "Bash(cd .worktrees/:*)",
+      "Bash(git push -u origin agent/*)",
+      "Bash(git push origin agent/*)",
+      "Bash(gh pr create --base main --head agent/*)",
+      "Bash(git -C .worktrees/* status*)",
+      "Bash(git -C .worktrees/* diff *)",
+      "Bash(git -C .worktrees/* log *)",
+      "Bash(git -C .worktrees/* add *)",
+      "Bash(git -C .worktrees/* commit *)",
+      "Bash(git -C .worktrees/* push -u origin agent/*)",
+      "Bash(git -C .worktrees/* push origin agent/*)",
+      "Bash(npm --prefix .worktrees/* ci)",
+      "Bash(npm --prefix .worktrees/* run *)",
       "Bash(npm run check)",
       "Bash(npm run test)",
       "Bash(npm run lint)",
@@ -38,8 +49,6 @@
       "Bash(ls:*)"
     ],
     "ask": [
-      "Bash(git push:*)",
-      "Bash(gh pr create:*)",
       "Bash(npm install:*)",
       "Edit(./package.json)",
       "Edit(./eslint.config.js)",
@@ -60,7 +69,12 @@
       "Bash(sudo:*)",
       "Bash(curl:*)",
       "Bash(wget:*)",
-      "Bash(git worktree remove --force:*)"
+      "Bash(git worktree remove --force:*)",
+      "Bash(git push * main)",
+      "Bash(git push * HEAD:main)",
+      "Bash(git -C * push * main)",
+      "Bash(git -C * push --force*)",
+      "Bash(git -C * push -f*)"
     ]
   }
 }
