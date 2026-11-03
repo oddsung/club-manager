@@ -58,7 +58,7 @@ export interface MeetingBoard {
   /** now 이후 시작, 취소 제외, 시작 시각 순. */
   upcoming(now: Date): Meeting[];
   respond(meetingId: string, memberId: string, status: ResponseStatus, now: Date): void;
-  /** 회원 목록은 처음 응답한 순서대로. */
+  /** 회원 목록은 처음 응답한 순서대로. 비활성 회원은 제외 (M2-Q16). */
   summary(meetingId: string): ResponseSummary;
 }
 
@@ -200,7 +200,10 @@ export function createMeetingBoard(options: MeetingBoardOptions): MeetingBoard {
     },
     summary(meetingId) {
       mustGet(meetingId);
-      const entries = [...(responses.get(meetingId) ?? new Map<string, ResponseStatus>()).entries()];
+      // M2-Q16: 비활성 회원 응답은 집계에서 제외 (응답 자체는 보관하므로 재활성화되면 다시 보인다)
+      const entries = [...(responses.get(meetingId) ?? new Map<string, ResponseStatus>()).entries()].filter(
+        ([memberId]) => members.get(memberId)?.active === true,
+      );
       const pick = (s: ResponseStatus) => {
         const memberIds = entries.filter(([, v]) => v === s).map(([k]) => k);
         return Object.freeze({ count: memberIds.length, memberIds: Object.freeze(memberIds) });
