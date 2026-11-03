@@ -43,8 +43,8 @@ const TRIALS = 30;
 
 export function formTeams(input: TeamFormationInput): TeamFormationResult {
   const { attendees, teamCount, teamSize } = input;
-  if (!Number.isInteger(teamCount) || teamCount < 1) {
-    throw new Error(`팀 수는 1 이상의 정수여야 합니다: ${teamCount}`);
+  if (!Number.isInteger(teamCount) || teamCount < 2) {
+    throw new Error(`팀 수는 2 이상의 정수여야 합니다: ${teamCount}`);
   }
   if (!Number.isInteger(teamSize) || teamSize < 1) {
     throw new Error(`팀당 인원수는 1 이상의 정수여야 합니다: ${teamSize}`);
