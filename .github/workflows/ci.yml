@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # PR 크기 검사에 base 브랜치 이력이 필요
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -20,3 +22,6 @@ jobs:
       - run: npm ci
       - name: npm run check
         run: npm run check
+      - name: PR 크기 검사
+        if: github.event_name == 'pull_request'
+        run: node scripts/check-pr-size.mjs origin/${{ github.base_ref }}
