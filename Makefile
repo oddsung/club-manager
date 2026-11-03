@@ -1,22 +1,4 @@
-# 완료 기준: make check
-
-.PHONY: check lint typecheck test guards install
-
-check: guards lint typecheck test
-	@echo "✅ make check 통과"
-
-install:
-	npm ci
-
-# 스택과 무관하게 항상 강제하는 안전 검사
-guards:
-	@bash scripts/check-guards.sh
-
-lint:
-	@npx --no-install eslint .
-
-typecheck:
-	@npx --no-install tsc --noEmit
-
-test:
-	@npx --no-install vitest run
+# 편의용 래퍼입니다. 완료 기준은 OS 공통 명령인 `npm run check` 입니다.
+.PHONY: check
+check:
+	npm run check

@@ -4,4 +4,4 @@
 
 - 에이전트 공통 규칙: [AGENTS.md](AGENTS.md)
 - 요구사항: [docs/requirements.md](docs/requirements.md)
-- 완료 기준: `make check`
+- 완료 기준: `npm run check`
