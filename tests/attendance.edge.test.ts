@@ -94,6 +94,28 @@ describe("R-04 모임 ID 필수 (공백 포함)", () => {
     book.check("mt-1", a.id);
     expect(() => book.attendanceRate(a.id, ["mt-1", " "])).toThrow(/모임 ID/);
   });
+
+  it("(M2-Q13) 체크 여부 조회 시 모임 ID가 비어 있거나 공백뿐이면 오류", () => {
+    const { book, a } = setup();
+    expect(() => book.isChecked("", a.id)).toThrow(/모임 ID/);
+    expect(() => book.isChecked("   ", a.id)).toThrow(/모임 ID/);
+  });
+});
+
+describe("(M2-Q12) 비활성 회원의 출석률", () => {
+  it("체크 후 비활성화된 회원도 출석률을 평소처럼 계산한다", () => {
+    const { registry, book, a } = setup();
+    book.check("mt-1", a.id);
+    registry.deactivate(a.id);
+    expect(book.attendanceRate(a.id, ["mt-1", "mt-2"])).toBe(0.5);
+  });
+
+  it("출석 기록이 없는 비활성 회원도 오류 없이 0", () => {
+    const { registry, book, b } = setup();
+    registry.deactivate(b.id);
+    expect(book.attendanceRate(b.id, ["mt-1", "mt-2"])).toBe(0);
+    expect(book.attendanceRate(b.id, [])).toBe(0);
+  });
 });
 
 describe("(M2-Q2) 체크 후 비활성화", () => {
