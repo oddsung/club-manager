@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # 스택이 정해지면 여기에 런타임 설치 단계를 추가합니다 (예: actions/setup-node, actions/setup-python)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
       - name: make check
         run: make check
