@@ -6,6 +6,8 @@
 ## 프로젝트 개요
 - 이름: club-manager (운동 동호회 관리 프로그램)
 - 단계: 파일럿 — 에이전트 관리 환경(신뢰 레이어) 검증용
+- 스택: TypeScript (Node 22), 테스트 Vitest, 린트 ESLint(typescript-eslint), 타입검사 tsc
+- 의존성 설치: `npm ci` (새 패키지 추가는 사람 승인 필요)
 - 상세 요구사항은 `docs/requirements.md`에 누적 기록합니다. 기록되지 않은 요구사항을 추측해서 구현하지 마세요.
 
 ## 완료의 정의 (가장 중요)
