@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Read",
@@ -8,6 +11,14 @@
       "Write(./src/**)",
       "Write(./tests/**)",
       "Write(./docs/**)",
+      "Edit(./.worktrees/*/src/**)",
+      "Edit(./.worktrees/*/tests/**)",
+      "Write(./.worktrees/*/src/**)",
+      "Write(./.worktrees/*/tests/**)",
+      "Bash(git fetch:*)",
+      "Bash(git worktree add .worktrees/:*)",
+      "Bash(git worktree list)",
+      "Bash(cd .worktrees/:*)",
       "Bash(npm run check)",
       "Bash(npm run test)",
       "Bash(npm run lint)",
@@ -48,7 +59,8 @@
       "Bash(rm -rf:*)",
       "Bash(sudo:*)",
       "Bash(curl:*)",
-      "Bash(wget:*)"
+      "Bash(wget:*)",
+      "Bash(git worktree remove --force:*)"
     ]
   }
 }
