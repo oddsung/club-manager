@@ -12,3 +12,4 @@
 - 2026-11-04: TASK-003 (M2 병렬) — 리드 + 팀원 3명(에이전트 팀, 각자 worktree). PR #11 `dues`(R-05, +242), #12 `meetings`(R-06, +398), #13 `attendance`(R-04, +260). 3개 CI 통과, 임시 통합 worktree(`.worktrees/integration`, detached)에서 3개 병합 → 충돌 없음, `npm run check` 통과(테스트 98개). 결정 M2-Q1~Q9와 팀원 자체 판단 6건은 `docs/requirements.md`. worktree 4개는 사람 확인 후 정리.
 - 2026-11-04: TASK-003 회고 — 팀원 승인 요청이 휴대폰에 오지 않는 문제 확인, 사이클 3 기록 정정, 2단계 조건부 판정. 권한 설정 변경은 사람 승인 대기.
 - 2026-11-04: (사람 승인) 팀원 push·PR을 agent/* 한정 허용, main push 금지, 팀원 명령 형식 통일. 팀원 자체 판단 6건 확정. TASK-004(휴대폰만으로 재검증) 작성.
+- 2026-11-04: TASK-004 (휴대폰만으로 병렬 재검증) — 팀원 3명, PR #17 `dues.edge`(13개), #18 `attendance.edge`(17개), #19 `meetings.edge`(20개). 각 PR 테스트 파일 1개, CI 통과. 통합 worktree(`.worktrees/integration-004`)에서 병합 → 충돌 없음, `npm run check` 통과(테스트 148개). 사람 승인 1회(계획)만으로 완료 — 팀원 승인 요청·표 밖 명령 요청 메시지 0건(리드 관찰 기준). 3개 PR 머지. 버그 없음. 미정 동작 M2-Q10~Q16을 `docs/requirements.md`에 기록. 팀원 2명이 `/verify` 대신 `npm run check`만 실행 → 다음 spawn 프롬프트에 명시 필요.
