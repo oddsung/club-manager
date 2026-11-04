@@ -46,10 +46,16 @@
       "Bash(git switch -c agent/:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(node scripts/agent-merge.mjs *)",
+      "Bash(git worktree remove .worktrees/*)",
+      "Bash(git worktree prune)",
+      "Bash(git branch -d agent/*)"
     ],
     "ask": [
       "Bash(npm install:*)",
+      "Edit(./scripts/**)",
+      "Write(./scripts/**)",
       "Edit(./package.json)",
       "Edit(./eslint.config.js)",
       "Edit(./tsconfig.json)",
@@ -74,7 +80,11 @@
       "Bash(git push * HEAD:main)",
       "Bash(git -C * push * main)",
       "Bash(git -C * push --force*)",
-      "Bash(git -C * push -f*)"
+      "Bash(git -C * push -f*)",
+      "Bash(gh pr merge *)",
+      "Bash(gh api *merge*)",
+      "Bash(git worktree remove * --force*)",
+      "Bash(git worktree remove -f*)"
     ]
   }
 }
