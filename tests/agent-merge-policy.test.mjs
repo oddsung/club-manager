@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assignedFiles, evaluate } from "../scripts/agent-merge-policy.mjs";
+import { assignedFiles, evaluate, isTaskStatusOnly } from "../scripts/agent-merge-policy.mjs";
 
 const TASK = `
 | 팀원 | 다룰 Qn | 고칠 파일 (이 파일만) |
@@ -81,5 +81,16 @@ describe("리드 자동 머지 정책 (scripts/agent-merge-policy.mjs)", () => {
     expect(failed(evaluate(pr("agent/x", { state: "closed" }), files, green, [TASK]))).toContain("기본");
     expect(failed(evaluate(pr("agent/x", { draft: true }), files, green, [TASK]))).toContain("기본");
     expect(failed(evaluate(pr("agent/x", { base: "dev" }), files, green, [TASK]))).toContain("기본");
+  });
+
+  it("TASK 지시서는 상태 줄만 바꾼 경우에만 리드가 머지할 수 있다", () => {
+    const statusOnly = { ...f("docs/tasks/006-absentees.md", 1, 1), patch: "@@ -1,3 +1,3 @@\n # TASK-006\n-> 상태: 대기\n+> 상태: 완료" };
+    const contentToo = { ...f("docs/tasks/006-absentees.md", 2, 1), patch: "@@ -1,3 +1,4 @@\n-> 상태: 대기\n+> 상태: 완료\n+| `absentees` | R-11 | `src/teams.ts` |" };
+    const newTask = { ...f("docs/tasks/007-x.md", 10, 0, "added"), patch: "+> 상태: 대기" };
+    expect(isTaskStatusOnly(statusOnly)).toBe(true);
+    expect(isTaskStatusOnly(contentToo)).toBe(false);
+    expect(isTaskStatusOnly(newTask)).toBe(false);
+    expect(evaluate(pr("agent/task-006-result"), [statusOnly, f("docs/progress.md")], green, [TASK]).ok).toBe(true);
+    expect(failed(evaluate(pr("agent/task-006-result"), [contentToo], green, [TASK]))).toContain("결정 문서 없음");
   });
 });

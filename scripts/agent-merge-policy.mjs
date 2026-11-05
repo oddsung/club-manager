@@ -6,6 +6,16 @@ export const SIZE_LIMIT = 500;
 /** 리드가 머지해도 되는 docs 파일 (결정이 없는 기록) */
 const LEAD_DOCS = new Set(["docs/progress.md", "docs/lessons.md"]);
 
+/**
+ * TASK 지시서의 상태 줄만 바꾼 변경인지 (예: "> 상태: 대기" → "> 상태: 완료").
+ * 지시서 내용(요구사항·배정)을 바꾸는 것은 결정이므로 사람이 머지한다.
+ */
+export function isTaskStatusOnly(file) {
+  if (!/^docs\/tasks\/[^/]+\.md$/.test(file.filename) || file.status !== "modified" || !file.patch) return false;
+  const changed = file.patch.split(/\r?\n/).filter((l) => /^[+-]/.test(l) && !/^(\+\+\+|---)/.test(l));
+  return changed.length > 0 && changed.every((l) => /^[+-]\s*>\s*상태:\s*(대기|진행 중|완료)\s*$/.test(l));
+}
+
 /** 바뀌면 무조건 사람이 머지해야 하는 경로 */
 const HUMAN_ONLY = [
   /^\.claude\//,
@@ -58,7 +68,7 @@ export function evaluate(pr, files, checks, taskTexts) {
 
   const code = files.filter((f) => /^(src|tests)\//.test(f.filename));
   const docs = files.filter((f) => f.filename.startsWith("docs/"));
-  const decisionDocs = docs.filter((f) => !LEAD_DOCS.has(f.filename));
+  const decisionDocs = docs.filter((f) => !LEAD_DOCS.has(f.filename) && !isTaskStatusOnly(f));
   add("결정 문서 없음", decisionDocs.length === 0,
     decisionDocs.length ? `사람 확정이 필요한 문서: ${decisionDocs.map((f) => f.filename).join(", ")}` : "없음");
 

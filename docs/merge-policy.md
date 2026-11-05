@@ -23,7 +23,7 @@ node scripts/agent-merge.mjs <PR 번호> --dry-run  # 검사만
 | P4 | `src/`를 바꾸면 `tests/` 변경도 있어야 함 |
 | 기존 테스트 | 기존 테스트 파일은 **추가만** 허용 (수정·삭제가 있으면 사람) |
 | 사람 전용 파일 | `.claude/`, `.github/`, `scripts/`, `AGENTS.md`, `CLAUDE.md`, `package*.json`, 설정 파일 → 사람 |
-| 결정 문서 | `docs/` 중 `progress.md`, `lessons.md` 외(요구사항, 정책, 로드맵, TASK 지시서, 매니저 지침) → 사람 |
+| 결정 문서 | `docs/` 중 `progress.md`, `lessons.md`, **TASK 지시서의 `> 상태:` 줄만 바꾼 변경** 외(요구사항, 정책, 로드맵, TASK 내용, 매니저 지침) → 사람 |
 
 ## 리드가 머지 전에 스스로 확인하고 보고서에 적는 조건 (기계 검사 불가)
 1. 병렬 작업이면, 같은 사이클 PR을 모두 합친 통합 worktree에서 `npm run check` 통과
