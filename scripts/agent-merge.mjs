@@ -25,7 +25,7 @@ if (!repo) {
 const p = gh(`repos/${repo}/pulls/${number}`);
 const pr = { state: p.state, draft: p.draft, base: p.base.ref, head: p.head.ref, headSha: p.head.sha };
 const files = gh(`repos/${repo}/pulls/${number}/files?per_page=100`)
-  .map((f) => ({ filename: f.filename, status: f.status, additions: f.additions, deletions: f.deletions }));
+  .map((f) => ({ filename: f.filename, status: f.status, additions: f.additions, deletions: f.deletions, patch: f.patch }));
 const checks = gh(`repos/${repo}/commits/${pr.headSha}/check-runs`).check_runs
   .map((c) => ({ name: c.name, status: c.status, conclusion: c.conclusion }));
 
